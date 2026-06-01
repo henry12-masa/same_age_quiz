@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>この人物、実は同い年クイズ</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:"Yu Gothic","Hiragino Sans",sans-serif;
+  background:linear-gradient(135deg,#0f172a,#312e81,#3b0764);
+  color:#fff;
+}
+.layout{
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  gap:20px;
+  padding:20px;
+}
+.game{
+  width:100%;
+  max-width:760px;
+  background:rgba(0,0,0,.62);
+  border:2px solid #a78bfa;
+  border-radius:18px;
+  padding:26px;
+  box-shadow:0 14px 35px rgba(0,0,0,.35);
+}
+h1{
+  text-align:center;
+  color:#ddd6fe;
+  margin-top:0;
+}
+.sub{
+  text-align:center;
+  color:#ddd;
+  margin-bottom:24px;
+  line-height:1.7;
+}
+.status{
+  display:flex;
+  justify-content:space-between;
+  color:#ddd6fe;
+  font-weight:bold;
+  margin-bottom:20px;
+}
+.question{
+  background:rgba(255,255,255,.08);
+  padding:22px;
+  border-radius:14px;
+  line-height:1.8;
+  font-size:1.2rem;
+  margin-bottom:20px;
+  border-left:6px solid #a78bfa;
+}
+.choices{
+  display:grid;
+  gap:12px;
+}
+button{
+  border:none;
+  border-radius:12px;
+  padding:15px;
+  font-size:1rem;
+  font-weight:bold;
+  cursor:pointer;
+  background:#ede9fe;
+  color:#1e1b4b;
+  transition:.15s;
+}
+button:hover{
+  background:#f5f3ff;
+  transform:translateY(-1px);
+}
+button.correct{
+  background:#22c55e;
+  color:#fff;
+}
+button.wrong{
+  background:#dc2626;
+  color:#fff;
+}
+button:disabled{
+  cursor:not-allowed;
+  transform:none;
+}
+.result{
+  margin-top:18px;
+  min-height:50px;
+  line-height:1.7;
+  font-weight:bold;
+}
+.explain{
+  color:#ddd;
+  margin-top:8px;
+  font-weight:normal;
+}
+.restart{
+  display:none;
+  margin-top:20px;
+  width:100%;
+  background:#7c3aed;
+  color:#fff;
+}
+.ad-area{
+  width:320px;
+  min-width:320px;
+  position:sticky;
+  top:20px;
+}
+.ad-box{
+  background:rgba(0,0,0,.5);
+  border:2px solid #a78bfa;
+  border-radius:14px;
+  padding:12px;
+}
+.ad-title{
+  text-align:center;
+  color:#ddd6fe;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+.note{
+  margin-top:18px;
+  color:#cbd5e1;
+  font-size:.9rem;
+  line-height:1.7;
+}
+@media(max-width:1000px){
+  .layout{flex-direction:column;align-items:center;}
+  .ad-area{width:100%;min-width:auto;position:static;}
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <div class="game">
+    <h1>この人物、実は同い年クイズ</h1>
+    <div class="sub">歴史人物・作家・科学者・芸能人などから「同じ生まれ年」の意外な組み合わせを当てよう！</div>
+
+    <div class="status">
+      <div id="count">1 / 50</div>
+      <div id="score">正解 0</div>
+    </div>
+
+    <div id="question" class="question"></div>
+    <div id="choices" class="choices"></div>
+    <div id="result" class="result"></div>
+
+    <button id="restart" class="restart" onclick="restartGame()">もう一度遊ぶ</button>
+
+    <div class="note">
+      ※このクイズは「同じ生まれ年」を当てる雑学クイズです。ナポレオンと坂本龍馬は同い年ではないため、ナポレオンは同じ1769年生まれのウェリントン公で出題しています。
+    </div>
+  </div>
+
+  <div class="ad-area">
+    <div class="ad-box">
+      <div class="ad-title">スポンサー</div>
+
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8398161859137802"
+       crossorigin="anonymous"></script>
+      <!-- チェス -->
+      <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-8398161859137802"
+       data-ad-slot="5599163841"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+      <script>
+       (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+const baseQuizData = [
+  {
+    "q": "「ナポレオン・ボナパルト」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ウェリントン公アーサー・ウェルズリー",
+      "福沢諭吉",
+      "芥川龍之介",
+      "マリリン・モンロー"
+    ],
+    "answer": "ウェリントン公アーサー・ウェルズリー",
+    "explain": "フランス皇帝と、ワーテルローで戦ったイギリス側の名将が同じ1769年生まれです。"
+  },
+  {
+    "q": "「福沢諭吉」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "アンドリュー・カーネギー",
+      "パブロ・ピカソ",
+      "ロナルド・レーガン",
+      "ドナルド・トランプ"
+    ],
+    "answer": "アンドリュー・カーネギー",
+    "explain": "日本の啓蒙思想家と、アメリカ鉄鋼王が同じ1835年生まれです。"
+  },
+  {
+    "q": "「坂本龍馬」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "松平容保",
+      "松下幸之助",
+      "チェ・ゲバラ",
+      "ジェニファー・ロペス"
+    ],
+    "answer": "松平容保",
+    "explain": "幕末の志士・坂本龍馬と、会津藩主として知られる松平容保は同じ1836年生まれです。"
+  },
+  {
+    "q": "「トーマス・エジソン」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "アレクサンダー・グラハム・ベル",
+      "アラン・チューリング",
+      "ヒラリー・クリントン",
+      "リアーナ"
+    ],
+    "answer": "アレクサンダー・グラハム・ベル",
+    "explain": "発明王エジソンと電話の発明で知られるベルは同じ1847年生まれです。"
+  },
+  {
+    "q": "「ジークムント・フロイト」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ニコラ・テスラ",
+      "マーティン・ルーサー・キング・ジュニア",
+      "イーロン・マスク",
+      "マリ・キュリー"
+    ],
+    "answer": "ニコラ・テスラ",
+    "explain": "精神分析のフロイトと発明家テスラは同じ1856年生まれです。"
+  },
+  {
+    "q": "「アーサー・コナン・ドイル」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ビリー・ザ・キッド",
+      "安倍晋三",
+      "ジャスティン・ビーバー",
+      "アガサ・クリスティ"
+    ],
+    "answer": "ビリー・ザ・キッド",
+    "explain": "シャーロック・ホームズの作者と西部開拓時代のアウトローが同じ1859年生まれです。"
+  },
+  {
+    "q": "「夏目漱石」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "マリ・キュリー",
+      "アンジェリーナ・ジョリー",
+      "レフ・トロツキー",
+      "イアン・フレミング"
+    ],
+    "answer": "マリ・キュリー",
+    "explain": "日本文学の巨人とノーベル賞科学者が同じ1867年生まれです。"
+  },
+  {
+    "q": "「アルベルト・アインシュタイン」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "レフ・トロツキー",
+      "ウェリントン公アーサー・ウェルズリー",
+      "J・R・R・トールキン",
+      "エリザベス2世"
+    ],
+    "answer": "レフ・トロツキー",
+    "explain": "相対性理論の科学者とロシア革命の人物が同じ1879年生まれです。"
+  },
+  {
+    "q": "「パブロ・ピカソ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "魯迅",
+      "レフ・トロツキー",
+      "テネシー・ウィリアムズ",
+      "フレディ・マーキュリー"
+    ],
+    "answer": "魯迅",
+    "explain": "スペインの画家ピカソと中国近代文学の魯迅は同じ1881年生まれです。"
+  },
+  {
+    "q": "「フランクリン・ルーズベルト」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "A・A・ミルン",
+      "オルダス・ハクスリー",
+      "アンディ・ウォーホル",
+      "Jay-Z"
+    ],
+    "answer": "A・A・ミルン",
+    "explain": "アメリカ大統領と『くまのプーさん』の作者が同じ1882年生まれです。"
+  },
+  {
+    "q": "「フランツ・カフカ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ココ・シャネル",
+      "金日成",
+      "アーノルド・シュワルツェネッガー",
+      "アデル"
+    ],
+    "answer": "ココ・シャネル",
+    "explain": "文学のカフカとファッションのシャネルは同じ1883年生まれです。"
+  },
+  {
+    "q": "「蒋介石」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ジョージア・オキーフ",
+      "オードリー・ヘプバーン",
+      "スヌープ・ドッグ",
+      "アーサー・コナン・ドイル"
+    ],
+    "answer": "ジョージア・オキーフ",
+    "explain": "中国近現代史の政治家とアメリカの画家が同じ1887年生まれです。"
+  },
+  {
+    "q": "「チャールズ・チャップリン」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "アドルフ・ヒトラー",
+      "ジャッキー・チェン",
+      "ハリー・スタイルズ",
+      "ドワイト・D・アイゼンハワー"
+    ],
+    "answer": "アドルフ・ヒトラー",
+    "explain": "喜劇王チャップリンとヒトラーは同じ1889年生まれで、しばしば比較されます。"
+  },
+  {
+    "q": "「ドワイト・D・アイゼンハワー」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "アガサ・クリスティ",
+      "デヴィッド・ベッカム",
+      "夏目漱石",
+      "リンドン・ジョンソン"
+    ],
+    "answer": "アガサ・クリスティ",
+    "explain": "連合軍最高司令官のち大統領と、推理小説の女王が同じ1890年生まれです。"
+  },
+  {
+    "q": "「芥川龍之介」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "J・R・R・トールキン",
+      "ナポレオン・ボナパルト",
+      "ドワイト・D・アイゼンハワー",
+      "マリリン・モンロー"
+    ],
+    "answer": "J・R・R・トールキン",
+    "explain": "日本文学の芥川と『指輪物語』の作者トールキンは同じ1892年生まれです。"
+  },
+  {
+    "q": "「松下幸之助」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "オルダス・ハクスリー",
+      "アルベルト・アインシュタイン",
+      "ロナルド・レーガン",
+      "ドナルド・トランプ"
+    ],
+    "answer": "オルダス・ハクスリー",
+    "explain": "経営の神様と『すばらしい新世界』の作者が同じ1894年生まれです。"
+  },
+  {
+    "q": "「川端康成」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "アーネスト・ヘミングウェイ",
+      "芥川龍之介",
+      "チェ・ゲバラ",
+      "ジェニファー・ロペス"
+    ],
+    "answer": "アーネスト・ヘミングウェイ",
+    "explain": "日本初のノーベル文学賞作家とアメリカ文学の巨人が同じ1899年生まれです。"
+  },
+  {
+    "q": "「昭和天皇」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ウォルト・ディズニー",
+      "アラン・チューリング",
+      "ヒラリー・クリントン",
+      "リアーナ"
+    ],
+    "answer": "ウォルト・ディズニー",
+    "explain": "昭和天皇とディズニー創業者ウォルト・ディズニーは同じ1901年生まれです。"
+  },
+  {
+    "q": "「小津安二郎」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ジョージ・オーウェル",
+      "マーティン・ルーサー・キング・ジュニア",
+      "イーロン・マスク",
+      "ビリー・ザ・キッド"
+    ],
+    "answer": "ジョージ・オーウェル",
+    "explain": "日本映画の巨匠と『1984年』の作者は同じ1903年生まれです。"
+  },
+  {
+    "q": "「ドクター・スース」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "鄧小平",
+      "安倍晋三",
+      "ジャスティン・ビーバー",
+      "アドルフ・ヒトラー"
+    ],
+    "answer": "鄧小平",
+    "explain": "児童文学作家ドクター・スースと中国の政治家鄧小平は同じ1904年生まれです。"
+  },
+  {
+    "q": "「リンドン・ジョンソン」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "イアン・フレミング",
+      "アンジェリーナ・ジョリー",
+      "マリ・キュリー",
+      "鄧小平"
+    ],
+    "answer": "イアン・フレミング",
+    "explain": "アメリカ大統領とジェームズ・ボンドの作者が同じ1908年生まれです。"
+  },
+  {
+    "q": "「ロナルド・レーガン」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "テネシー・ウィリアムズ",
+      "ウェリントン公アーサー・ウェルズリー",
+      "アガサ・クリスティ",
+      "エリザベス2世"
+    ],
+    "answer": "テネシー・ウィリアムズ",
+    "explain": "アメリカ大統領レーガンと劇作家テネシー・ウィリアムズは同じ1911年生まれです。"
+  },
+  {
+    "q": "「アラン・チューリング」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "金日成",
+      "レフ・トロツキー",
+      "イアン・フレミング",
+      "フレディ・マーキュリー"
+    ],
+    "answer": "金日成",
+    "explain": "コンピューター科学の先駆者と北朝鮮の建国指導者が同じ1912年生まれです。"
+  },
+  {
+    "q": "「リチャード・ニクソン」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "アルベール・カミュ",
+      "J・R・R・トールキン",
+      "アンディ・ウォーホル",
+      "Jay-Z"
+    ],
+    "answer": "アルベール・カミュ",
+    "explain": "アメリカ大統領とフランス文学のカミュは同じ1913年生まれです。"
+  },
+  {
+    "q": "「ジョン・F・ケネディ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "インディラ・ガンディー",
+      "テネシー・ウィリアムズ",
+      "アーノルド・シュワルツェネッガー",
+      "アデル"
+    ],
+    "answer": "インディラ・ガンディー",
+    "explain": "アメリカ大統領とインド首相が同じ1917年生まれです。"
+  },
+  {
+    "q": "「ネルソン・マンデラ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "レナード・バーンスタイン",
+      "オードリー・ヘプバーン",
+      "スヌープ・ドッグ",
+      "アーサー・コナン・ドイル"
+    ],
+    "answer": "レナード・バーンスタイン",
+    "explain": "南アフリカの政治家と指揮者・作曲家が同じ1918年生まれです。"
+  },
+  {
+    "q": "「アイザック・アシモフ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "フェデリコ・フェリーニ",
+      "ジャッキー・チェン",
+      "ハリー・スタイルズ",
+      "チャールズ・チャップリン"
+    ],
+    "answer": "フェデリコ・フェリーニ",
+    "explain": "SF作家アシモフと映画監督フェリーニは同じ1920年生まれです。"
+  },
+  {
+    "q": "「マリリン・モンロー」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "エリザベス2世",
+      "デヴィッド・ベッカム",
+      "夏目漱石",
+      "ドクター・スース"
+    ],
+    "answer": "エリザベス2世",
+    "explain": "ハリウッドの象徴とイギリス女王が同じ1926年生まれです。"
+  },
+  {
+    "q": "「チェ・ゲバラ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "アンディ・ウォーホル",
+      "ナポレオン・ボナパルト",
+      "ドワイト・D・アイゼンハワー",
+      "アイザック・アシモフ"
+    ],
+    "answer": "アンディ・ウォーホル",
+    "explain": "革命家ゲバラとポップアートのウォーホルは同じ1928年生まれです。"
+  },
+  {
+    "q": "「マーティン・ルーサー・キング・ジュニア」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "オードリー・ヘプバーン",
+      "アルベルト・アインシュタイン",
+      "リンドン・ジョンソン",
+      "ドナルド・トランプ"
+    ],
+    "answer": "オードリー・ヘプバーン",
+    "explain": "公民権運動の指導者と映画スターが同じ1929年生まれです。"
+  },
+  {
+    "q": "「ニール・アームストロング」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ウォーレン・バフェット",
+      "芥川龍之介",
+      "マリリン・モンロー",
+      "ジェニファー・ロペス"
+    ],
+    "answer": "ウォーレン・バフェット",
+    "explain": "月面に降り立った宇宙飛行士と投資家バフェットは同じ1930年生まれです。"
+  },
+  {
+    "q": "「エルヴィス・プレスリー」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ダライ・ラマ14世",
+      "ロナルド・レーガン",
+      "ヒラリー・クリントン",
+      "リアーナ"
+    ],
+    "answer": "ダライ・ラマ14世",
+    "explain": "ロックンロールの王様とチベット仏教の指導者が同じ1935年生まれです。"
+  },
+  {
+    "q": "「ジョン・レノン」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ブルース・リー",
+      "チェ・ゲバラ",
+      "イーロン・マスク",
+      "ビリー・ザ・キッド"
+    ],
+    "answer": "ブルース・リー",
+    "explain": "ビートルズのジョンと武道家・俳優ブルース・リーは同じ1940年生まれです。"
+  },
+  {
+    "q": "「スティーヴン・ホーキング」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "モハメド・アリ",
+      "安倍晋三",
+      "ジャスティン・ビーバー",
+      "アドルフ・ヒトラー"
+    ],
+    "answer": "モハメド・アリ",
+    "explain": "理論物理学者ホーキングとボクシング王者アリは同じ1942年生まれです。"
+  },
+  {
+    "q": "「ドナルド・トランプ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "フレディ・マーキュリー",
+      "アンジェリーナ・ジョリー",
+      "マリ・キュリー",
+      "鄧小平"
+    ],
+    "answer": "フレディ・マーキュリー",
+    "explain": "アメリカ大統領経験者とクイーンのボーカルは同じ1946年生まれです。"
+  },
+  {
+    "q": "「ヒラリー・クリントン」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "アーノルド・シュワルツェネッガー",
+      "ウェリントン公アーサー・ウェルズリー",
+      "アガサ・クリスティ",
+      "フェデリコ・フェリーニ"
+    ],
+    "answer": "アーノルド・シュワルツェネッガー",
+    "explain": "政治家ヒラリーと俳優・政治家シュワルツェネッガーは同じ1947年生まれです。"
+  },
+  {
+    "q": "「安倍晋三」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ジャッキー・チェン",
+      "レフ・トロツキー",
+      "イアン・フレミング",
+      "モハメド・アリ"
+    ],
+    "answer": "ジャッキー・チェン",
+    "explain": "日本の首相経験者と香港のアクションスターは同じ1954年生まれです。"
+  },
+  {
+    "q": "「スティーブ・ジョブズ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ビル・ゲイツ",
+      "J・R・R・トールキン",
+      "エリザベス2世",
+      "Jay-Z"
+    ],
+    "answer": "ビル・ゲイツ",
+    "explain": "AppleとMicrosoftを象徴する2人は同じ1955年生まれです。"
+  },
+  {
+    "q": "「マイケル・ジャクソン」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "マドンナ",
+      "テネシー・ウィリアムズ",
+      "フレディ・マーキュリー",
+      "アデル"
+    ],
+    "answer": "マドンナ",
+    "explain": "ポップ界を代表する2人は同じ1958年生まれです。"
+  },
+  {
+    "q": "「バラク・オバマ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ダイアナ妃",
+      "アンディ・ウォーホル",
+      "スヌープ・ドッグ",
+      "アーサー・コナン・ドイル"
+    ],
+    "answer": "ダイアナ妃",
+    "explain": "アメリカ大統領経験者と英国王室のダイアナ妃は同じ1961年生まれです。"
+  },
+  {
+    "q": "「キアヌ・リーブス」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ニコラス・ケイジ",
+      "アーノルド・シュワルツェネッガー",
+      "ハリー・スタイルズ",
+      "チャールズ・チャップリン"
+    ],
+    "answer": "ニコラス・ケイジ",
+    "explain": "映画俳優のキアヌとニコラス・ケイジは同じ1964年生まれです。"
+  },
+  {
+    "q": "「ジェニファー・ロペス」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "Jay-Z",
+      "デヴィッド・ベッカム",
+      "夏目漱石",
+      "ドクター・スース"
+    ],
+    "answer": "Jay-Z",
+    "explain": "歌手・俳優のJ.LoとラッパーJay-Zは同じ1969年生まれです。"
+  },
+  {
+    "q": "「イーロン・マスク」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "スヌープ・ドッグ",
+      "ナポレオン・ボナパルト",
+      "ドワイト・D・アイゼンハワー",
+      "アイザック・アシモフ"
+    ],
+    "answer": "スヌープ・ドッグ",
+    "explain": "実業家マスクとラッパーのスヌープ・ドッグは同じ1971年生まれです。"
+  },
+  {
+    "q": "「アンジェリーナ・ジョリー」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "デヴィッド・ベッカム",
+      "アルベルト・アインシュタイン",
+      "リンドン・ジョンソン",
+      "スティーヴン・ホーキング"
+    ],
+    "answer": "デヴィッド・ベッカム",
+    "explain": "俳優アンジェリーナとサッカー選手ベッカムは同じ1975年生まれです。"
+  },
+  {
+    "q": "「シャキーラ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "カニエ・ウェスト",
+      "芥川龍之介",
+      "マリリン・モンロー",
+      "キアヌ・リーブス"
+    ],
+    "answer": "カニエ・ウェスト",
+    "explain": "歌手シャキーラとラッパーのカニエ・ウェストは同じ1977年生まれです。"
+  },
+  {
+    "q": "「ビヨンセ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ジャスティン・ティンバーレイク",
+      "ロナルド・レーガン",
+      "ドナルド・トランプ",
+      "リアーナ"
+    ],
+    "answer": "ジャスティン・ティンバーレイク",
+    "explain": "世界的歌手のビヨンセとジャスティンは同じ1981年生まれです。"
+  },
+  {
+    "q": "「マーク・ザッカーバーグ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "スカーレット・ヨハンソン",
+      "チェ・ゲバラ",
+      "ジェニファー・ロペス",
+      "ビリー・ザ・キッド"
+    ],
+    "answer": "スカーレット・ヨハンソン",
+    "explain": "Meta創業者とハリウッド俳優が同じ1984年生まれです。"
+  },
+  {
+    "q": "「レディー・ガガ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ウサイン・ボルト",
+      "ヒラリー・クリントン",
+      "ジャスティン・ビーバー",
+      "アドルフ・ヒトラー"
+    ],
+    "answer": "ウサイン・ボルト",
+    "explain": "歌手ガガと短距離走の王者ボルトは同じ1986年生まれです。"
+  },
+  {
+    "q": "「リアーナ」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "アデル",
+      "イーロン・マスク",
+      "マリ・キュリー",
+      "鄧小平"
+    ],
+    "answer": "アデル",
+    "explain": "世界的歌手のリアーナとアデルは同じ1988年生まれです。"
+  },
+  {
+    "q": "「ジャスティン・ビーバー」と実は同じ生まれ年の人物は誰？",
+    "choices": [
+      "ハリー・スタイルズ",
+      "ウェリントン公アーサー・ウェルズリー",
+      "アガサ・クリスティ",
+      "フェデリコ・フェリーニ"
+    ],
+    "answer": "ハリー・スタイルズ",
+    "explain": "ポップスターのビーバーとハリー・スタイルズは同じ1994年生まれです。"
+  }
+];
+
+const quizData = [];
+for(let i = 0; i < 4; i++){
+  baseQuizData.forEach(item => {
+    quizData.push({
+      q:item.q,
+      choices:[...item.choices],
+      answer:item.answer,
+      explain:item.explain
+    });
+  });
+}
+
+let questions = [];
+let current = 0;
+let score = 0;
+let lock = false;
+
+function shuffle(arr){
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startGame(){
+  questions = shuffle([...quizData]).slice(0,50);
+  current = 0;
+  score = 0;
+  lock = false;
+  document.getElementById("restart").style.display = "none";
+  showQuestion();
+}
+
+function showQuestion(){
+  lock = false;
+  const q = questions[current];
+
+  document.getElementById("count").textContent = `${current + 1} / 50`;
+  document.getElementById("score").textContent = `正解 ${score}`;
+  document.getElementById("question").textContent = q.q;
+  document.getElementById("result").innerHTML = "";
+
+  const choicesEl = document.getElementById("choices");
+  choicesEl.innerHTML = "";
+
+  shuffle([...q.choices]).forEach(choice => {
+    const btn = document.createElement("button");
+    btn.textContent = choice;
+    btn.onclick = () => checkAnswer(btn, choice);
+    choicesEl.appendChild(btn);
+  });
+}
+
+function checkAnswer(button, choice){
+  if(lock) return;
+  lock = true;
+
+  const q = questions[current];
+  const buttons = document.querySelectorAll("#choices button");
+
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    if(btn.textContent === q.answer){
+      btn.classList.add("correct");
+    }
+  });
+
+  if(choice === q.answer){
+    score++;
+    button.classList.add("correct");
+    document.getElementById("result").innerHTML =
+      `正解！<div class="explain">${q.explain}</div>`;
+  }else{
+    button.classList.add("wrong");
+    document.getElementById("result").innerHTML =
+      `不正解… 正解は「${q.answer}」<div class="explain">${q.explain}</div>`;
+  }
+
+  document.getElementById("score").textContent = `正解 ${score}`;
+
+  setTimeout(() => {
+    current++;
+    if(current < questions.length){
+      showQuestion();
+    }else{
+      finishGame();
+    }
+  }, 1700);
+}
+
+function finishGame(){
+  document.getElementById("question").textContent =
+    `50問終了！ ${score}問正解！`;
+
+  document.getElementById("choices").innerHTML = "";
+
+  let message = "";
+  if(score >= 45){
+    message = "同い年雑学マスター！歴史の横並び感覚がすごい！";
+  }else if(score >= 30){
+    message = "かなり詳しい！意外な同世代をよく見抜けています！";
+  }else{
+    message = "もう一度挑戦して、意外な同い年コンビを覚えよう！";
+  }
+
+  document.getElementById("result").innerHTML = message;
+  document.getElementById("restart").style.display = "block";
+}
+
+function restartGame(){
+  startGame();
+}
+
+startGame();
+</script>
+
+</body>
+</html>
